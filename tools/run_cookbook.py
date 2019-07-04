@@ -20,13 +20,14 @@ def main():
     tarball = 'MEGARA-cookbook-M15_LCB_HR-R-v1.tar.gz'
     url = 'http://guaix.fis.ucm.es/~spr/megara_test/{}'.format(tarball)
 
-    downloaded = download_cache(url)
+    # downloaded = download_cache(url)
 
     # Uncompress
-    with tarfile.open(downloaded.name, mode="r:gz") as tar:
-        tar.extractall()
+    # with tarfile.open(downloaded.name, mode="r:gz") as tar:
+    #with tarfile.open(tarball, mode="r:gz") as tar:
+    #    tar.extractall()
 
-    os.remove(downloaded.name)
+    # os.remove(downloaded.name)
 
     persist = False
 
@@ -53,29 +54,28 @@ def main():
     try:
         if not persist:
             obsid = "0_bias"
-            task0 = run_reduce(dm, obsid)
+            task0 = run_reduce(dm, obsid, validate_inputs=True, validate_results=True)
 
             obsid = "1_HR-R"
-            task1 = run_reduce(dm, obsid)
+            task1 = run_reduce(dm, obsid, validate_inputs=True, validate_results=True)
 
             obsid = "3_HR-R"
-            task3 = run_reduce(dm, obsid)
+            task3 = run_reduce(dm, obsid, validate_inputs=True, validate_results=True)
 
             obsid = "4_HR-R"
-            task4 = run_reduce(dm, obsid)
+            task4 = run_reduce(dm, obsid, validate_inputs=True, validate_results=True)
 
             obsid = "5_HR-R"
-            task5 = run_reduce(dm, obsid)
+            task5 = run_reduce(dm, obsid, validate_inputs=True, validate_results=True)
 
             obsid = "6_HR-R"
-            task6 = run_reduce(dm, obsid)
+            task6 = run_reduce(dm, obsid, validate_inputs=True, validate_results=True)
 
             obsid = "7_HR-R"
-            task7 = run_reduce(dm, obsid)
+            task7 = run_reduce(dm, obsid, validate_inputs=True, validate_results=True)
 
             obsid = "8_HR-R"
-            task8 = run_reduce(dm, obsid)
-
+            task8 = run_reduce(dm, obsid, validate_inputs=True, validate_results=True)
     finally:
         with ctx.working_directory(basedir):
             with open('control_dump.yaml', 'w') as fd:
