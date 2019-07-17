@@ -74,7 +74,7 @@ def main():
          "3_M15_wavecalib.yaml", "5_M15_twilight.yaml",
          "7_M15_Standardstar.yaml"]
 
-            obsresults = ["0_bias.yaml", "2_M15_modelmap.yaml"]
+            #obsresults = ["0_bias.yaml", "1_M15_tracemap.yaml"]
 
             #sessions, loaded_obs = load_observations(obsresults, is_session=False)
             #dm.backend.add_obs(loaded_obs)
@@ -82,10 +82,10 @@ def main():
         if not persist:
             obsid = "0_bias"
             task0 = run_reduce(dm, obsid)
-            return 0
+            #return 0
             obsid = "1_HR-R"
             task1 = run_reduce(dm, obsid)
-
+            return 0
             obsid = "3_HR-R"
             task3 = run_reduce(dm, obsid)
 
