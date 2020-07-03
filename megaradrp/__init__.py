@@ -11,8 +11,9 @@
 
 import logging
 
+import megaradrp.version
 
-__version__ = '0.11.dev0'
+__version__ = megaradrp.version.version
 
 
 # Top level NullHandler

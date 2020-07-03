@@ -12,6 +12,7 @@
 # serve to show the default.
 
 import sys, os
+import pkg_resources
 
 # This is required by autodoc to work
 sys.path.insert(0, os.path.abspath('../'))
@@ -27,8 +28,9 @@ exclude_patterns = ['_build']
 
 project = u'MEGARA Data Reduction Pipeline'
 copyright = u'2013-2020, Universidad Complutense de Madrid'
-version = '0.11'
-release = '0.11.dev0'
+
+release = pkg_resources.get_distribution('megaradrp').version
+version = '.'.join(release.split('.')[:2])
 show_authors = True
 
 numpydoc_show_class_members = False

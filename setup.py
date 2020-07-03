@@ -29,6 +29,9 @@ setup(
             'basestruct.json'
         ]
     },
+    setup_requires=[
+        'setuptools_scm'
+    ],
     install_requires=[
         'setuptools>=36.2.1',
         'numpy',
@@ -45,6 +48,9 @@ setup(
         'test': ['pytest', 'pytest-remotedata']
     },
     zip_safe=False,
+    use_scm_version={
+        'write_to': 'megaradrp/version.py'
+    },
     entry_points={
         'numina.pipeline.1': [
             'MEGARA = megaradrp.loader:load_drp'
