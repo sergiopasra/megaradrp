@@ -1,5 +1,5 @@
 #
-# Copyright 2011-2020 Universidad Complutense de Madrid
+# Copyright 2011-2021 Universidad Complutense de Madrid
 #
 # This file is part of Megara DRP
 #
@@ -132,11 +132,11 @@ class TraceMapRecipe(MegaraBaseRecipe):
                 continue
             if trace.start > start_min:
                 cost_ids[idx] += 1
-                msg = 'In fiber {}, trace start > {}'.format(trace.fibid, start_min)
+                msg = f'In fiber {trace.fibid}, trace start > {start_min}'
                 warnings.warn(msg)
             if trace.stop < end_max:
                 cost_ids[idx] += 1
-                msg = 'In fiber {}, trace end < {}'.format(trace.fibid, end_max)
+                msg = f'In fiber {trace.fibid}, trace end < {end_max}'
                 warnings.warn(msg)
 
         total = sum(cost_ids)
@@ -420,10 +420,10 @@ class TraceMapRecipe(MegaraBaseRecipe):
 
                     if debug_plot:
                         plt.plot(mm[:, 0], mm[:, 1], '.')
-                        plt.savefig('trace-xy-{:03d}.png'.format(dtrace.fibid))
+                        plt.savefig(f'trace-xy-{dtrace.fibid:03d}.png')
                         plt.close()
                         plt.plot(mm[:, 0], mm[:, 2], '.')
-                        plt.savefig('trace-xz-{:03d}.png'.format(dtrace.fibid))
+                        plt.savefig(f'trace-xz-{dtrace.fibid:03d}.png')
                         plt.close()
                     if len(mm) < poldeg + 1:
                         self.logger.warning('in fibid %d, only %d points to fit pol of degree %d',
@@ -547,7 +547,7 @@ def init_traces(image, center, hs, boxes, box_borders, tol=1.5, threshold=0.37, 
         if debug_plot:
             plt.plot(region)
             plt.plot(ipeaks_int, region[ipeaks_int], 'r*')
-            plt.savefig('central_cut_{:02d}.png'.format(boxid))
+            plt.savefig(f'central_cut_{boxid:02d}.png')
             plt.close()
 
         startid = lastid + 1
