@@ -101,7 +101,7 @@ class TraceMapRecipe(MegaraBaseRecipe):
 
     reduced_image = Result(ProcessedImage)
     reduced_rss = Result(ProcessedRSS)
-    master_traces = Result(TraceMap)
+    master_traces = Result(TraceMap, destname="mtraces_{tags[insmode]}_{tags[vph]}")
 
     def run_qc(self, recipe_input, recipe_result):
         """Run quality control checks"""
