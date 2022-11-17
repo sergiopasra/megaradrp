@@ -1,5 +1,5 @@
 #
-# Copyright 2011-2017 Universidad Complutense de Madrid
+# Copyright 2011-2022 Universidad Complutense de Madrid
 #
 # This file is part of Megara DRP
 #
@@ -22,8 +22,9 @@ class FiberSolutionArcCalibration(object):
         self.solution = solution
 
     def __getstate__(self):
-        return {'fibid': self.fibid,
-                'solution': self.solution.__getstate__()
+        return {
+            'fibid': self.fibid,
+            'solution': self.solution.__getstate__()
         }
 
     def __setstate__(self, state):
@@ -34,9 +35,9 @@ class FiberSolutionArcCalibration(object):
 
 
 class WavelengthCalibration(BaseStructuredCalibration):
-    """Wavelength Calibration Product
-    """
+    """Wavelength Calibration Product"""
 
+    destname = "{dest}_{tags[insmode]}_{tags[vph]}"
     __tags__ = ['insmode', 'vph']
 
     def __init__(self, instrument='unknown'):
