@@ -59,6 +59,7 @@ class GeometricTrace(GeometricAperture):
 class TraceMap(BaseStructuredCalibration):
     """Trace map calibration product"""
     DATATYPE = MegaraDataType.TRACE_MAP
+    destname = "{dest}_{tags[insmode]}_{tags[vph]}"
     __tags__ = ['insmode', 'vph']
 
     def __init__(self, instrument='MEGARA'):
