@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2023 Universidad Complutense de Madrid
+# Copyright 2016-2026 Universidad Complutense de Madrid
 #
 # This file is part of Megara DRP
 #
@@ -37,7 +37,7 @@ _logger = logging.getLogger(__name__)
 class SimpleWcs1D:
     """Store parameters of a simple 1D WCS"""
 
-    def __init__(self, crval=0, crpix=0, cdelt=1, ctype='', cunit='', **kwargs):
+    def __init__(self, crval=0, crpix=0, cdelt=1, ctype="", cunit="", **kwargs):
         self.crval = crval
         self.crpix = crpix
         self.cdelt = cdelt
@@ -50,32 +50,26 @@ class SimpleWcs1D:
         w.wcs.crpix = [self.crpix, 0.0]
         w.wcs.cdelt = [self.cdelt, 1.0]
         w.wcs.crval = [self.crval, 0.0]
-        w.wcs.ctype = ['AWAV', ' ']
+        w.wcs.ctype = ["AWAV", " "]
         return w
 
 
 class WavelengthCalibrator(Corrector):
     """A Node that applies wavelength calibration."""
 
-    def __init__(self, solutionwl, datamodel=None, dtype='float32'):
+    def __init__(self, solutionwl, datamodel=None, dtype="float32"):
 
-        super(WavelengthCalibrator, self).__init__(
-            datamodel=datamodel,
-            calibid=solutionwl.calibid,
-            dtype=dtype)
+        super(WavelengthCalibrator, self).__init__(datamodel=datamodel, calibid=solutionwl.calibid, dtype=dtype)
 
         self.solutionwl = solutionwl
 
     def run(self, rss):
 
-        newrss = calibrate_wl_rss_megara(
-            rss, self.solutionwl,
-            dtype=self.dtype, span=2, inplace=True
-        )
+        newrss = calibrate_wl_rss_megara(rss, self.solutionwl, dtype=self.dtype, span=2, inplace=True)
         return newrss
 
 
-def calibrate_wl_rss_megara(rss, solutionwl, dtype='float32', span=0, inplace=False):
+def calibrate_wl_rss_megara(rss, solutionwl, dtype="float32", span=0, inplace=False):
     """Apply wavelength calibration to a RSS
 
     Parameters
@@ -99,37 +93,31 @@ def calibrate_wl_rss_megara(rss, solutionwl, dtype='float32', span=0, inplace=Fa
     """
 
     imgid = dm.get_imgid(rss)
-    _logger.debug('wavelength calibration in image %s', imgid)
-    _logger.debug('with wavecalib %s', solutionwl.calibid)
-    _logger.debug('offsets are %s', solutionwl.global_offset.coef)
+    _logger.debug("wavelength calibration in image %s", imgid)
+    _logger.debug("with wavecalib %s", solutionwl.calibid)
+    _logger.debug("offsets are %s", solutionwl.global_offset.coef)
 
-    current_vph = rss[0].header['VPH']
-    current_insmode = rss[0].header['INSMODE']
+    current_vph = rss[0].header["VPH"]
+    current_insmode = rss[0].header["INSMODE"]
 
-    _logger.debug('Current INSMODE is %s, VPH is %s',
-                  current_insmode, current_vph)
+    _logger.debug("Current INSMODE is %s, VPH is %s", current_insmode, current_vph)
     if current_insmode in WLCALIB_PARAMS and current_vph in WLCALIB_PARAMS[current_insmode]:
         wvpar_dict = WLCALIB_PARAMS[current_insmode][current_vph]
-        _logger.info('precomputed wl parameters are %s', wvpar_dict)
+        _logger.info("precomputed wl parameters are %s", wvpar_dict)
     else:
-        msg = 'insmode {} grism {} is not defined in megaradrp.instrument.WLCALIB_PARAMS'.format(
-            current_insmode,
-            current_vph
+        msg = "insmode {} grism {} is not defined in megaradrp.instrument.WLCALIB_PARAMS".format(
+            current_insmode, current_vph
         )
         raise ValueError(msg)
 
     targetwcs = SimpleWcs1D(**wvpar_dict)
-    npix = wvpar_dict['npix']
+    npix = wvpar_dict["npix"]
 
-    result = calibrate_wl_rss(
-        rss, solutionwl, npix, targetwcs,
-        dtype=dtype,
-        span=span, inplace=inplace
-    )
+    result = calibrate_wl_rss(rss, solutionwl, npix, targetwcs, dtype=dtype, span=span, inplace=inplace)
     return result
 
 
-def calibrate_wl_rss(rss, solutionwl, npix, targetwcs, dtype='float32', span=0, inplace=False):
+def calibrate_wl_rss(rss, solutionwl, npix, targetwcs, dtype="float32", span=0, inplace=False):
     """Apply wavelength calibration to a RSS
 
     Parameters
@@ -161,50 +149,45 @@ def calibrate_wl_rss(rss, solutionwl, npix, targetwcs, dtype='float32', span=0, 
         rss = copy_img(rss)
 
     imgid = dm.get_imgid(rss)
-    _logger.debug('wavelength calibration in image %s', imgid)
-    _logger.debug('with wavecalib %s', solutionwl.calibid)
-    _logger.debug('offsets are %s', solutionwl.global_offset.coef)
+    _logger.debug("wavelength calibration in image %s", imgid)
+    _logger.debug("with wavecalib %s", solutionwl.calibid)
+    _logger.debug("offsets are %s", solutionwl.global_offset.coef)
 
     # Target WCS
     re_wcs = targetwcs.create_internal_wcs_()
 
-    _logger.debug('Resample RSS')
-    final, limits = resample_rss_flux(
-        rss[0].data, solutionwl, npix, re_wcs,
-        span=span, fill=0
-    )
+    _logger.debug("Resample RSS")
+    final, limits = resample_rss_flux(rss[0].data, solutionwl, npix, re_wcs, span=span, fill=0)
 
     rss[0].data = final.astype(dtype)
 
     hdr = rss[0].header
-    _logger.debug('Add WCS headers')
+    _logger.debug("Add WCS headers")
     rss_add_wcs(hdr, targetwcs.crval, targetwcs.cdelt, targetwcs.crpix)
     try:
-        header_add_barycentric_correction(hdr, key='B')
+        header_add_barycentric_correction(hdr, key="B")
     except KeyError as error:
-        _logger.warning(
-            'Missing key %s, cannot add barycentric correction', error)
-    _logger.debug('Add calibration headers')
-    hdr['NUM-WAV'] = solutionwl.calibid
-    hdr['history'] = f'Wavelength calibration with {solutionwl.calibid}'
-    hdr['history'] = 'Aperture extraction offsets are {}'.format(
-        solutionwl.global_offset.coef.tolist())
-    hdr['history'] = f'Wavelength calibration time {datetime.datetime.now(datetime.UTC).isoformat()}'
-    hdr['history'] = f'Resample span={span}'
+        _logger.warning("Missing key %s, cannot add barycentric correction", error)
+    _logger.debug("Add calibration headers")
+    hdr["NUM-WAV"] = solutionwl.calibid
+    hdr["history"] = f"Wavelength calibration with {solutionwl.calibid}"
+    hdr["history"] = "Aperture extraction offsets are {}".format(solutionwl.global_offset.coef.tolist())
+    hdr["history"] = f"Wavelength calibration time {datetime.datetime.now(datetime.UTC).isoformat()}"
+    hdr["history"] = f"Resample span={span}"
     # Update UUID
-    hdr['UUID'] = str(uuid.uuid1())
+    hdr["UUID"] = str(uuid.uuid1())
 
     # Update other HDUs if needed
     # dtype here can be int16 or uint8
-    map_data = numpy.zeros_like(final, dtype='int16')
+    map_data = numpy.zeros_like(final, dtype="int16")
 
-    fibers_ext = rss['FIBERS']
+    fibers_ext = rss["FIBERS"]
     fibers_ext_headers = fibers_ext.header
     # Add KEYWORDS
     # FIB%03dW1, FIB%03dW2
     for fibid, (lower, upper) in limits:
         idx = fibid - 1
-        map_data[idx, lower:upper+1] = 1
+        map_data[idx, lower : upper + 1] = 1
         # Update Fibers
         key = f"FIB{fibid:03d}W1"
         fibers_ext_headers[key] = (lower + 1, "Start of spectral coverage")
@@ -223,7 +206,7 @@ def calibrate_wl_rss(rss, solutionwl, npix, targetwcs, dtype='float32', span=0, 
         key = "FIB%03d_V" % fibid
         fibers_ext_headers[key] = False
 
-    rss_map = fits.ImageHDU(data=map_data, name='WLMAP')
+    rss_map = fits.ImageHDU(data=map_data, name="WLMAP")
 
     rss.append(rss_map)
     return rss
@@ -231,24 +214,24 @@ def calibrate_wl_rss(rss, solutionwl, npix, targetwcs, dtype='float32', span=0, 
 
 def rss_add_wcs(hdr, crval, cdelt, crpix):
     """Add MEGARA 2D wavelength calibration headers"""
-    c_crpix = 'Pixel coordinate of reference point'
-    c_cunit = 'Units of coordinate increment and value'
-    unit = 'Angstrom'
-    c_crval = 'Coordinate value at reference point'
-    c_cdelt = 'Coordinate increment at reference point'
-    hdr['CRPIX1'] = crpix, c_crpix
-    hdr['CRVAL1'] = crval, c_crval
-    hdr['CDELT1'] = cdelt, c_cdelt
-    hdr['CUNIT1'] = unit, c_cunit
-    hdr['CTYPE1'] = 'AWAV', 'Air wavelength (linear)'
+    c_crpix = "Pixel coordinate of reference point"
+    c_cunit = "Units of coordinate increment and value"
+    unit = "Angstrom"
+    c_crval = "Coordinate value at reference point"
+    c_cdelt = "Coordinate increment at reference point"
+    hdr["CRPIX1"] = crpix, c_crpix
+    hdr["CRVAL1"] = crval, c_crval
+    hdr["CDELT1"] = cdelt, c_cdelt
+    hdr["CUNIT1"] = unit, c_cunit
+    hdr["CTYPE1"] = "AWAV", "Air wavelength (linear)"
 
-    hdr['CRPIX2'] = 0.0, c_crpix
-    hdr['CRVAL2'] = 0.0, c_crval
-    hdr['CDELT2'] = 1.0, c_cdelt
-    hdr['CTYPE2'] = ''
+    hdr["CRPIX2"] = 0.0, c_crpix
+    hdr["CRVAL2"] = 0.0, c_crval
+    hdr["CDELT2"] = 1.0, c_cdelt
+    hdr["CTYPE2"] = ""
 
-    hdr['SPECSYS'] = 'TOPOCENT'
-    hdr['SSYSOBS'] = 'TOPOCENT'
+    hdr["SPECSYS"] = "TOPOCENT"
+    hdr["SSYSOBS"] = "TOPOCENT"
     return hdr
 
 
@@ -258,12 +241,12 @@ def create_internal_wcs_(wlr0, delt, crpix):
     w.wcs.crpix = [crpix, 0.0]
     w.wcs.cdelt = [delt, 1.0]
     w.wcs.crval = [wlr0, 0.0]
-    w.wcs.ctype = ['AWAV', ' ']
+    w.wcs.ctype = ["AWAV", " "]
 
     return w
 
 
-def header_add_barycentric_correction(hdr, key='B', out=None):
+def header_add_barycentric_correction(hdr, key="B", out=None):
     """Add WCS keywords with barycentric correction
 
     Raises
@@ -278,53 +261,54 @@ def header_add_barycentric_correction(hdr, key='B', out=None):
     import astropy.constants as cons
 
     # Header must have DATE-OBS
-    if 'DATE-OBS' not in hdr:
-        raise KeyError("Keyword 'DATE-OBS' not found.")
-    # Header must contain a primary WCS
-    # Header must contain RADEG and DECDEG
+    for kreq in ["DATE-OBS", "RADEG", "DECDEG"]:
+        if kreq not in hdr:
+            raise KeyError(f"Keyword '{kreq}' not found.")
 
-    if 'OBSGEO-X' not in hdr:
-        warnings.warn(
-            'OBSGEO- keywords not defined, using default values for GTC', RuntimeWarning)
+    if "OBSGEO-B" not in hdr:
+        warnings.warn("OBSGEO- keywords not defined, using default values for GTC", RuntimeWarning)
         # Geocentric coordinates of GTC
-        hdr['OBSGEO-X'] = 5327285.0921
-        hdr['OBSGEO-Y'] = -1718777.1125
-        hdr['OBSGEO-Z'] = 3051786.7327
+        # Former values
+        # hdr['OBSGEO-X'] = 5327285.0921
+        # hdr['OBSGEO-Y'] = -1718777.1125
+        # hdr['OBSGEO-Z'] = 3051786.7327
+        hdr["OBSGEO-B"] = (+28.76060, "[deg] Geodetic latitude")
+        hdr["OBSGEO-L"] = (-17.88160, "[deg] Geodetic longitude")
+        hdr["OBSGEO-H"] = (2326, "[m] Geodetic altitude")
 
     # Get main WCS
-    wcs0 = astropy.wcs.WCS(hdr)
+    wcs0 = astropy.wcs.WCS(hdr, fix=False)
     if wcs0.wcs.spec == -1:
         # We don't have a spec axis
-        raise TypeError('Header does not contain spectral axis')
-    gtc = EarthLocation.from_geocentric(
-        wcs0.wcs.obsgeo[0], wcs0.wcs.obsgeo[1], wcs0.wcs.obsgeo[2], unit='m')
-    date_obs = astropy.time.Time(wcs0.wcs.dateobs, format='fits')
+        raise TypeError("Header does not contain spectral axis")
+    gtc = EarthLocation.from_geocentric(wcs0.wcs.obsgeo[0], wcs0.wcs.obsgeo[1], wcs0.wcs.obsgeo[2], unit="m")
+    date_obs = astropy.time.Time(wcs0.wcs.dateobs, format="fits")
     # if frame='fk5', we need to pass the epoch and equinox
-    sc = SkyCoord(ra=hdr['RADEG'], dec=hdr['DECDEG'], unit='deg')
+    sc = SkyCoord(ra=hdr["RADEG"], dec=hdr["DECDEG"], unit="deg")
     rv = sc.radial_velocity_correction(obstime=date_obs, location=gtc)
-    factor = (1 + rv / cons.c).to('').value
+    factor = (1 + rv / cons.c).to("").value
 
     if out is None:
         out = hdr
 
-    out[f'WCSNAME{key}'] = 'Barycentric correction'
+    out[f"WCSNAME{key}"] = "Barycentric correction"
     # out['CNAME1{}'.format(key)] = 'AxisV'
-    out[f'CTYPE1{key}'] = hdr['CTYPE1']
-    out[f'CRPIX1{key}'] = hdr['CRPIX1']
-    out[f'CRVAL1{key}'] = hdr['CRVAL1'] * factor
-    out[f'CDELT1{key}'] = hdr['CDELT1'] * factor
-    out[f'CUNIT1{key}'] = hdr['CUNIT1']
+    out[f"CTYPE1{key}"] = hdr["CTYPE1"]
+    out[f"CRPIX1{key}"] = hdr["CRPIX1"]
+    out[f"CRVAL1{key}"] = hdr["CRVAL1"] * factor
+    out[f"CDELT1{key}"] = hdr["CDELT1"] * factor
+    out[f"CUNIT1{key}"] = hdr["CUNIT1"]
 
-    for keyword in ['CRPIX2', 'CRVAL2', 'CDELT2', 'CTYPE2']:
+    for keyword in ["CRPIX2", "CRVAL2", "CDELT2", "CTYPE2"]:
         try:
-            out[f'{keyword}{key}'] = hdr[f'{keyword}']
+            out[f"{keyword}{key}"] = hdr[f"{keyword}"]
         except KeyError:
             # Ignore non-existing key
             pass
 
-    out[f'VELOSYS{key}'] = rv.to('m / s').value
-    out[f'SPECSYS{key}'] = 'BARYCENT'
-    out[f'SSYSOBS{key}'] = 'TOPOCENT'
+    out[f"VELOSYS{key}"] = rv.to("m / s").value
+    out[f"SPECSYS{key}"] = "BARYCENT"
+    out[f"SSYSOBS{key}"] = "TOPOCENT"
     return out
 
 
@@ -359,13 +343,13 @@ def resample_rss_flux(arr, solutionwl, npix, finalwcs, span=0, fill=0):
     nsamples = arr.shape[1]
 
     # Use only the spectral axis
-    subwcs = finalwcs.sub(['spectral'])
+    subwcs = finalwcs.sub(["spectral"])
 
     # wl_max,  = subwcs.all_pix2world([npix], 1)
 
     # 0-based index
     new_x = numpy.arange(npix)
-    new_wl,  = subwcs.all_pix2world(new_x, 0)
+    (new_wl,) = subwcs.all_pix2world(new_x, 0)
 
     # 0-based left borders
     old_x_borders_0 = numpy.arange(-0.5, nsamples)
@@ -394,7 +378,7 @@ def resample_rss_flux(arr, solutionwl, npix, finalwcs, span=0, fill=0):
         # Polynomial returns AA
         old_wl_borders = polyval(old_x_borders_1, coeff)
         # 0-based, AA
-        ss_vals, = subwcs.all_world2pix(old_wl_borders[[0, -1]], 0)
+        (ss_vals,) = subwcs.all_world2pix(old_wl_borders[[0, -1]], 0)
         # s1 is the 0-based pixel that contains the lower limit
         # s2 is the 0-based pixel that contains the upper limit
         s1, s2 = ss_vals
@@ -404,26 +388,21 @@ def resample_rss_flux(arr, solutionwl, npix, finalwcs, span=0, fill=0):
         upper = max(0, min(s2, npix - 1))
 
         if lower > upper:
-            warnings.warn('lower limit is > upper limit', RuntimeWarning)
+            warnings.warn("lower limit is > upper limit", RuntimeWarning)
 
         # We need a monotonic interpolator
         # linear would work, we use a cubic interpolator
-        interpolator = SteffenInterpolator(
-            old_wl_borders,
-            accum_flux[idx],
-            extrapolate='border'
-        )
+        interpolator = SteffenInterpolator(old_wl_borders, accum_flux[idx], extrapolate="border")
 
         if lower + span > upper - span:
-            warnings.warn(
-                'lower limit + span is > upper limit - span', RuntimeWarning)
+            warnings.warn("lower limit + span is > upper limit - span", RuntimeWarning)
 
         fl_borders = interpolator(new_wl_borders)
         rss_resampled[idx] = fl_borders[1:] - fl_borders[:-1]
         # Expand the border to remove `span` pixels
         # in both sides, to avoid high variance
-        rss_resampled[idx, lower:lower + span] = fill
-        rss_resampled[idx, upper + 1 - span:upper + 1] = fill
+        rss_resampled[idx, lower : lower + span] = fill
+        rss_resampled[idx, upper + 1 - span : upper + 1] = fill
         limits.append((fibid, (lower + span, upper - span)))
 
     return rss_resampled, limits
@@ -431,10 +410,11 @@ def resample_rss_flux(arr, solutionwl, npix, finalwcs, span=0, fill=0):
 
 def pixel_borders(arr):
     import numina.array.wavecalib.resample as W
+
     return W.map_borders(arr)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import numina.types.structured as stru
     import logging
 
@@ -446,7 +426,7 @@ if __name__ == '__main__':
     solutionwl = stru.open(wlname)
 
     rss2 = calibrate_wl_rss_megara(rss, solutionwl)
-    rss2.writeto('result_span0b.fits', overwrite=True)
+    rss2.writeto("result_span0b.fits", overwrite=True)
 
     rss2 = calibrate_wl_rss_megara(rss, solutionwl, span=2)
-    rss2.writeto('result_span2b.fits', overwrite=True)
+    rss2.writeto("result_span2b.fits", overwrite=True)

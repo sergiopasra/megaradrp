@@ -1,10 +1,11 @@
-import pytest
-import numpy as np
+import warnings
+
 import astropy.wcs
+import numpy as np
+import pytest
 
 from megaradrp.testing.create_header import create_spec_header2, create_sky_header2
 from megaradrp.processing.wavecalibration import header_add_barycentric_correction
-
 from megaradrp.processing.cube import create_cube, merge_wcs
 
 
@@ -17,8 +18,8 @@ def test_sub_wcs():
     hdr_sky = create_sky_header2()
     hdr_spec = create_spec_header2()
     hdr_spec = header_add_barycentric_correction(hdr_spec)
-    wcs_sky = astropy.wcs.WCS(header=hdr_sky)
-    wcs_spec = astropy.wcs.WCS(header=hdr_spec, key="B")
+    wcs_sky = astropy.wcs.WCS(header=hdr_sky, fix=False)
+    wcs_spec = astropy.wcs.WCS(header=hdr_spec, key="B", fix=False)
     wcs3 = wcs_sky.sub([1, 2, 0])
     wcs3.wcs.ctype[2] = wcs_spec.wcs.ctype[0]
     wcs3.wcs.crval[2] = wcs_spec.wcs.crval[0]
@@ -32,6 +33,20 @@ def test_sub_wcs():
     assert True
 
 
+@pytest.mark.xfail(
+    reason="Astropy issue #15814: spurious END warning from find_all_wcs()",
+    strict=False,
+)
+def test_find_all_wcs_should_not_warn():
+    hdr_spec1 = create_spec_header2()
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        astropy.wcs.find_all_wcs(hdr_spec1)
+
+    assert not w
+
+
 def test_merge_wcs():
     hdr_spec = create_spec_header2()
     hdr_spec = header_add_barycentric_correction(hdr_spec)
@@ -39,8 +54,8 @@ def test_merge_wcs():
     out = hdr_spec.copy()
     merge_wcs(hdr_sky, hdr_spec, out=out)
 
-    wcs0 = astropy.wcs.WCS(header=out)
-    wcsB = astropy.wcs.WCS(header=out, key="B")
+    wcs0 = astropy.wcs.WCS(header=out, fix=False)
+    wcsB = astropy.wcs.WCS(header=out, key="B", fix=False)
 
     assert list(wcs0.wcs.ctype) == ["RA---TAN", "DEC--TAN", "AWAV"]
     assert np.allclose(

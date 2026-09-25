@@ -25,10 +25,12 @@ def test_add_barycentric_missing3():
     hdr = fits.Header()
     hdr["DATE-OBS"] = "2017-08-23T21:38:30.55"
     # GTC
-    hdr["OBSGEO-X"] = 5327285.0921
-    hdr["OBSGEO-Y"] = -1718777.1125
-    hdr["OBSGEO-Z"] = 3051786.7327
-
+    # hdr["OBSGEO-X"] = 5327285.0921
+    # hdr["OBSGEO-Y"] = -1718777.1125
+    # hdr["OBSGEO-Z"] = 3051786.7327
+    hdr["OBSGEO-B"] = +28.76060
+    hdr["OBSGEO-L"] = -17.88160
+    hdr["OBSGEO-H"] = 2326
     hdr["RADEG"] = 285.481037748898
     hdr["DECDEG"] = 42.4882140636786
 
