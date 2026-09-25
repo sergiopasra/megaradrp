@@ -89,3 +89,10 @@ exclude = '''
 )/
 '''
 
+[tool.pytest.ini_options]
+addopts = "-x"
+filterwarnings = [
+    "error",
+    "ignore:END:astropy.wcs.wcs.FITSFixedWarning", # Bug en astropy
+    "ignore::DeprecationWarning",
+]
