@@ -1,5 +1,5 @@
 #
-# Copyright 2015-2023 Universidad Complutense de Madrid
+# Copyright 2015-2026 Universidad Complutense de Madrid
 #
 # This file is part of Megara DRP
 #
@@ -44,13 +44,9 @@ class DerivedRecipe(MegaraBaseRecipe):
 
         reduced1 = img
 
-        fits.writeto(
-            self.directorio + "/reduced_flat.fits", reduced1[0].data, overwrite=True
-        )
+        fits.writeto(self.directorio + "/reduced_flat.fits", reduced1[0].data, overwrite=True)
 
-        fits.writeto(
-            self.directorio + "/reduced_flat_bpm.fits", reduced1[0].data, overwrite=True
-        )
+        fits.writeto(self.directorio + "/reduced_flat_bpm.fits", reduced1[0].data, overwrite=True)
 
         return self.create_result()
 
@@ -78,15 +74,13 @@ def test_bpm_corrector():
     header["INSMODE"] = "MOS"
     insmodel.configure_with_header(header)
     ob.configuration = insmodel
-    ob.frames = [DataFrame(filename=open(nombre).name) for nombre in names]
+    ob.frames = [DataFrame(filename=nombre) for nombre in names]
 
     recipe = DerivedRecipe(directorio)
     ri = recipe.create_input(
         obresult=ob,
-        master_bias=DataFrame(
-            filename=open(directorio + "/master_bias_data0.fits").name
-        ),
-        master_bpm=DataFrame(filename=open(directorio + "/master_bpm.fits").name),
+        master_bias=DataFrame(filename=directorio + "/master_bias_data0.fits"),
+        master_bpm=DataFrame(filename=directorio + "/master_bpm.fits"),
     )
 
     recipe.run(ri)

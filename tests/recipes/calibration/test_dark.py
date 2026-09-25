@@ -87,7 +87,7 @@ def test_dark():
     names = []
     for aux in range(number):
         names.append(f"{temporary_path}/dark_{aux}.fits")
-    ob.frames = [DataFrame(filename=open(nombre).name) for nombre in names]
+    ob.frames = [DataFrame(filename=nombre) for nombre in names]
 
     ob.configuration = insmodel
     recipe = DarkRecipe()

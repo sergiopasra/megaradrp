@@ -1,5 +1,5 @@
 #
-# Copyright 2015-2025 Universidad Complutense de Madrid
+# Copyright 2015-2026 Universidad Complutense de Madrid
 #
 # This file is part of Megara DRP
 #
@@ -185,10 +185,7 @@ def create_sample_files(temporary_path, number=5):
 
     source2 = 1.0
 
-    fs = [
-        simulate_flat(detector, exposure=1.0, source=5000 * source2)
-        for i in range(number)
-    ]
+    fs = [simulate_flat(detector, exposure=1.0, source=5000 * source2) for i in range(number)]
 
     header = fits.Header()
     header["DATE-OBS"] = date_obs
@@ -197,14 +194,10 @@ def create_sample_files(temporary_path, number=5):
     header["VPH"] = "LR-U"
     header["INSMODE"] = "MOS"
     for aux in range(len(fs)):
-        fits.writeto(
-            f"{temporary_path}/flat_{aux}.fits", fs[aux], header=header, overwrite=True
-        )
+        fits.writeto(f"{temporary_path}/flat_{aux}.fits", fs[aux], header=header, overwrite=True)
 
     result = generate_bias(detector, number, temporary_path)
-    result.master_bias.frame.writeto(
-        f"{temporary_path}/master_bias_data0.fits", overwrite=True
-    )  # Master Bias
+    result.master_bias.frame.writeto(f"{temporary_path}/master_bias_data0.fits", overwrite=True)  # Master Bias
 
     ob = ObservationResult()
     ob.instrument = "MEGARA"
@@ -218,14 +211,12 @@ def create_sample_files(temporary_path, number=5):
     names = []
     for aux in range(number):
         names.append(f"{temporary_path}/flat_{aux}.fits")
-    ob.frames = [DataFrame(filename=open(nombre).name) for nombre in names]
+    ob.frames = [DataFrame(filename=nombre) for nombre in names]
 
     recipe = BadPixelsMaskRecipe()
     ri = recipe.create_input(
         obresult=ob,
-        master_bias=DataFrame(
-            filename=open(temporary_path + "/master_bias_data0.fits").name
-        ),
+        master_bias=DataFrame(filename=temporary_path + "/master_bias_data0.fits"),
     )
     aux = recipe.run(ri)
     aux.master_bpm.frame.writeto(f"{temporary_path}/master_bpm.fits", overwrite=True)

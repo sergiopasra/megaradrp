@@ -1,5 +1,5 @@
 #
-# Copyright 2011-2023 Universidad Complutense de Madrid
+# Copyright 2011-2026 Universidad Complutense de Madrid
 #
 # This file is part of Megara DRP
 #
@@ -59,47 +59,37 @@ class BadPixelsMaskRecipe(MegaraBaseRecipe):
     master_bpm = Result(MasterBPM)
 
     def run(self, rinput):
-        self.logger.info('start BPM recipe')
+        self.logger.info("start BPM recipe")
         nframes = len(rinput.obresult.frames)
 
-        self.logger.debug('we have %d images', nframes)
+        self.logger.debug("we have %d images", nframes)
         half = nframes // 2
         flow = self.init_filters(rinput, rinput.obresult.configuration)
-        self.logger.debug('we have %d images', nframes)
-        reduced1 = basic_processing_with_combination_frames(
-            rinput.obresult.frames[:half],
-            flow,
-            method=combine.median
-        )
+        self.logger.debug("we have %d images", nframes)
+        reduced1 = basic_processing_with_combination_frames(rinput.obresult.frames[:half], flow, method=combine.median)
 
-        self.save_intermediate_img(reduced1, 'reduced_image_1.fits')
+        self.save_intermediate_img(reduced1, "reduced_image_1.fits")
 
-        reduced2 = basic_processing_with_combination_frames(
-            rinput.obresult.frames[half:],
-            flow,
-            method=combine.median
-        )
+        reduced2 = basic_processing_with_combination_frames(rinput.obresult.frames[half:], flow, method=combine.median)
 
-        self.save_intermediate_img(reduced2, 'reduced_image_2.fits')
+        self.save_intermediate_img(reduced2, "reduced_image_2.fits")
 
-        ratio, mask, sigma = ccdmask(
-            reduced1[0].data, reduced2[0].data, mode='full')
+        ratio, mask, sigma = ccdmask(reduced1[0].data, reduced2[0].data, mode="full")
 
         hdu = fits.PrimaryHDU(mask, header=reduced1[0].header)
-        hdu.header['UUID'] = str(uuid.uuid1())
+        hdu.header["UUID"] = str(uuid.uuid1())
 
         self.set_base_headers(hdu.header)
 
         tnow = datetime.datetime.now(datetime.UTC)
-        hdu.header['history'] = 'BPM creation time {}'.format(tnow.isoformat())
+        hdu.header["history"] = "BPM creation time {}".format(tnow.isoformat())
 
         for frame in rinput.obresult.frames:
-            hdu.header['history'] = "With image {}".format(
-                self.datamodel.get_imgid(frame.open())
-            )
+            with frame.open() as img:
+                hdu.header["history"] = "With image {}".format(self.datamodel.get_imgid(img))
 
         reduced = fits.HDUList([hdu])
-        self.logger.info('end BPM recipe')
+        self.logger.info("end BPM recipe")
         return self.create_result(master_bpm=reduced)
 
     def validate_input(self, recipe_input):
@@ -118,7 +108,7 @@ class BadPixelsMaskRecipe(MegaraBaseRecipe):
         # Check that the number of frames is even
         nimages = len(obresult.frames)
         if nimages % 2 != 0:
-            msg = f'expected even number of frames, received {nimages} instead'
+            msg = f"expected even number of frames, received {nimages} instead"
             raise numina.exceptions.ValidationError(msg)
         # Continue with additional checks
         return super(BadPixelsMaskRecipe, self).validate_input(recipe_input)
@@ -126,5 +116,5 @@ class BadPixelsMaskRecipe(MegaraBaseRecipe):
     def set_base_headers(self, hdr):
         """Set metadata in FITS headers."""
         hdr = super(BadPixelsMaskRecipe, self).set_base_headers(hdr)
-        hdr['NUMTYPE'] = ('MasterBPM', 'Product type')
+        hdr["NUMTYPE"] = ("MasterBPM", "Product type")
         return hdr
